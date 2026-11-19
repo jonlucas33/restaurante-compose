@@ -1,0 +1,78 @@
+# ==========================================================
+# 🍽️ RESTAURANTE COM DOCKER COMPOSE
+# ==========================================================
+#   frontend  = SALÃO     (onde o cliente faz o pedido)      → :8080
+#   backend   = COZINHA   (prepara os pedidos, regras)       → :4000
+#   db        = DESPENSA  (guarda os ingredientes/dados)     → sem porta
+#   adminer   = GERÊNCIA  (confere a despensa pelo navegador)→ :8081
+#   pgdata    = FREEZER   (volume: os dados sobrevivem ao container)
+#
+# Todos ficam na mesma rede criada pelo Compose e se encontram
+# pelo NOME DO SERVIÇO (ex.: o backend acessa o banco em "db").
+# ==========================================================
+
+services:
+
+  # ---------- DESPENSA: banco PostgreSQL ----------
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: senai
+      POSTGRES_PASSWORD: senai
+      POSTGRES_DB: restaurante
+    volumes:
+      # Freezer: onde o PostgreSQL guarda os dados de verdade
+      - pgdata:/var/lib/postgresql/data
+      # Scripts de criação e carga inicial (só rodam com o volume vazio)
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # "A despensa já está aberta?" O backend só sobe quando responder que sim
+      test: ["CMD-SHELL", "pg_isready -U senai -d restaurante"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Sem "ports": a despensa NÃO fica exposta para fora.
+    # Só os serviços da mesma rede (backend, adminer) a alcançam.
+
+  # ---------- COZINHA: API Node.js + Express ----------
+  backend:
+    build: ./backend
+    environment:
+      PORT: 4000
+      # "db" = nome do serviço acima (o DNS do Docker resolve)
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: senai
+      DB_PASSWORD: senai
+      DB_DATABASE: restaurante
+    ports:
+      # porta_no_seu_PC:porta_no_container
+      - "4000:4000"
+    depends_on:
+      db:
+        # Espera o healthcheck do banco ficar "healthy"
+        condition: service_healthy
+
+  # ---------- SALÃO: React servido pelo Nginx ----------
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # O navegador chama /api no próprio Nginx, que repassa ao backend
+        VITE_API_URL: /api
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  # ---------- GERÊNCIA: Adminer (interface web do banco) ----------
+  adminer:
+    image: adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+# Volumes nomeados: o "freezer" gerenciado pelo Docker
+volumes:
+  pgdata:
