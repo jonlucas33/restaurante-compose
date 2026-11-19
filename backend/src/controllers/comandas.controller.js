@@ -14,7 +14,7 @@ const db = require('../services/database');
  */
 const listarComandas = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM comandas ORDER BY criado_em DESC');
+    const [rows] = await db.query('SELECT * FROM comandas ORDER BY criado_em DESC, id DESC');
 
     // Garante que 'itens' seja um array (o driver pode devolver string ou objeto)
     const comandasComItens = rows.map(comanda => ({
@@ -311,7 +311,7 @@ const listarComandasPorMesa = async (req, res) => {
     }
 
     const [rows] = await db.query(
-      'SELECT * FROM comandas WHERE mesa = ? ORDER BY criado_em DESC',
+      'SELECT * FROM comandas WHERE mesa = ? ORDER BY criado_em DESC, id DESC',
       [mesa]
     );
 
