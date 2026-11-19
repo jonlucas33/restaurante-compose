@@ -32,6 +32,10 @@ Navegador ──► :8081 Adminer (gerência) ───────────�
 Pré-requisito: **Docker Desktop** aberto (com o Docker Compose v2).
 
 ```bash
+# 1ª vez: crie o seu .env a partir do modelo (credenciais do banco)
+copy .env.example .env      # Windows (Prompt/PowerShell)
+# cp .env.example .env      # Linux/macOS/Git Bash
+
 # Constrói as imagens e sobe tudo em segundo plano
 docker compose up -d --build
 
@@ -55,7 +59,7 @@ Depois abra:
 | Senha | **senai** |
 | Base de dados | **restaurante** |
 
-> Estas credenciais são só para a aula. Em projeto real, elas ficam num `.env` fora do Git (ver Bônus).
+> Estes são os valores do `.env.example`. As credenciais ficam no `.env` (fora do Git) e o Compose as lê automaticamente; se você trocar no seu `.env`, use os novos valores aqui. Para conferir a substituição: `docker compose config`.
 
 ## Endpoints da API
 
@@ -195,5 +199,5 @@ Adicione ao restaurante um sistema de **reservas de mesa**.
 
 ### ⭐ Bônus
 
-- Tire as credenciais do `docker-compose.yml`: crie um `.env` (fora do Git, já está no `.gitignore`) e use `${POSTGRES_PASSWORD}` no Compose. Versione só um `.env.example` **sem senhas reais**.
+- Troque a senha do banco no seu `.env`, recrie tudo com `docker compose down -v` + `docker compose up -d --build` e entre no Adminer com a senha nova (o volume precisa ser apagado: o PostgreSQL só aplica a senha ao criar o banco).
 - Crie uma tela de reservas no front-end (formulário + lista).

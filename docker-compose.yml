@@ -9,6 +9,13 @@
 #
 # Todos ficam na mesma rede criada pelo Compose e se encontram
 # pelo NOME DO SERVIÇO (ex.: o backend acessa o banco em "db").
+#
+# 🔐 CREDENCIAIS NO .env
+# O Compose lê AUTOMATICAMENTE o arquivo .env que fica na mesma
+# pasta deste docker-compose.yml e troca cada ${VARIAVEL} pelo
+# valor de lá (confira o resultado com: docker compose config).
+# Assim a senha não fica escrita aqui nem vai para o Git.
+# Primeira vez? Copie o modelo:  copy .env.example .env
 # ==========================================================
 
 services:
@@ -17,9 +24,10 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: senai
-      POSTGRES_PASSWORD: senai
-      POSTGRES_DB: restaurante
+      # Valores vindos do .env (substituídos pelo Compose)
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       # Freezer: onde o PostgreSQL guarda os dados de verdade
       - pgdata:/var/lib/postgresql/data
@@ -27,7 +35,9 @@ services:
       - ./db:/docker-entrypoint-initdb.d:ro
     healthcheck:
       # "A despensa já está aberta?" O backend só sobe quando responder que sim
-      test: ["CMD-SHELL", "pg_isready -U senai -d restaurante"]
+      # $$ = "não substitua agora": o Compose entrega $POSTGRES_USER literal
+      # e quem lê a variável é o shell DENTRO do container do banco.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -42,9 +52,10 @@ services:
       # "db" = nome do serviço acima (o DNS do Docker resolve)
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: senai
-      DB_PASSWORD: senai
-      DB_DATABASE: restaurante
+      # Mesmas credenciais do banco, lidas do .env
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DATABASE: ${POSTGRES_DB}
     ports:
       # porta_no_seu_PC:porta_no_container
       - "4000:4000"
