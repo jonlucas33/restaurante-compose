@@ -84,7 +84,8 @@ Status válidos: `pendente`, `em_preparo`, `pronto`, `entregue`, `cancelado`.
 curl.exe http://localhost:4000/health
 curl.exe http://localhost:4000/api/cardapio
 
-# Criar um prato (PowerShell: aspas simples por fora, duplas por dentro)
+# Criar um prato (Windows PowerShell 5.1: aspas simples por fora e \" por dentro;
+# no PowerShell 7.3+ use o JSON sem as barras: '{"nome":"Feijoada",...}')
 curl.exe -X POST http://localhost:4000/api/cardapio -H "Content-Type: application/json" -d '{\"nome\":\"Feijoada\",\"preco\":32.5,\"descricao\":\"Sábado\"}'
 
 # Criar uma comanda
