@@ -1,0 +1,14 @@
+# Dependências (reinstaladas pelo npm / dentro da imagem)
+node_modules/
+
+# Build do front-end
+dist/
+
+# Variáveis de ambiente e credenciais: NUNCA vão para o Git
+.env
+.env.*
+
+# Logs e sistema
+*.log
+.DS_Store
+Thumbs.db
