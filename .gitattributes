@@ -1,0 +1,2 @@
+# Arquivos que rodam dentro de containers Linux ficam com fim de linha LF
+* text=auto eol=lf
